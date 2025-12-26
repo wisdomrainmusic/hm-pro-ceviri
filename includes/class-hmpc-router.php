@@ -7,6 +7,8 @@ class HMPC_Router {
         // WP route etmeden önce prefix'i kırp
         add_action('parse_request', [$this, 'handle_lang_prefix'], 0);
 
+        add_filter('redirect_canonical', [$this, 'prevent_wp_canonical_redirect_on_lang_prefix'], 10, 2);
+
         // İsteğe bağlı: ?hm_lang=en gelirse cookie set (geri uyumluluk)
         add_action('init', [$this, 'handle_query_lang'], 1);
     }
@@ -51,5 +53,29 @@ class HMPC_Router {
         }
 
         $GLOBALS['hmpc_current_lang'] = HMPC_I18n::get_current_lang();
+    }
+
+    public function prevent_wp_canonical_redirect_on_lang_prefix($redirect_url, $requested_url) {
+        // Admin/AJAX değilken çalışsın
+        if (is_admin() || wp_doing_ajax()) return $redirect_url;
+
+        $settings = HMPC_I18n::get_settings();
+        $default  = $settings['default_lang'] ?? 'tr';
+        $enabled  = $settings['enabled_langs'] ?? [$default];
+        $prefixed = array_values(array_filter($enabled, fn($c) => $c !== $default));
+
+        $req_uri = $_SERVER['REQUEST_URI'] ?? '';
+        $path = strtok($req_uri, '?');
+
+        foreach ($prefixed as $code) {
+            $code = sanitize_key($code);
+
+            if ($path === '/' . $code . '/' || strpos($path, '/' . $code . '/') === 0) {
+                // WordPress'in /en/test -> /test canonical redirectini engelle
+                return false;
+            }
+        }
+
+        return $redirect_url;
     }
 }
