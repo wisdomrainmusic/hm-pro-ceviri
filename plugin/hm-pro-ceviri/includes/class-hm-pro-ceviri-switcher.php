@@ -51,7 +51,7 @@ class HM_Pro_Ceviri_Switcher {
         $out = '<div class="hmpc-switcher hmpc-switcher--inline" role="navigation" aria-label="Language switcher">';
         foreach ($enabled as $code) {
             $label = $this->label_for($code, $catalog, $atts['show_native'] === '1');
-            $url = add_query_arg(HM_Pro_Ceviri_I18n::QUERY_VAR, $code, $base_url);
+            $url = $this->url_for_lang($base_url, $code);
             $class = 'hmpc-switcher__link' . ($code === $current ? ' is-active' : '');
             $out .= '<a class="' . esc_attr($class) . '" href="' . esc_url($url) . '">' . esc_html($label) . '</a>';
         }
@@ -64,6 +64,37 @@ class HM_Pro_Ceviri_Switcher {
         if (!isset($catalog[$code])) return strtoupper($code);
         if ($show_native && !empty($catalog[$code]['native'])) return $catalog[$code]['native'];
         return $catalog[$code]['label'] ?? strtoupper($code);
+    }
+
+    private function url_for_lang(string $base_url, string $lang): string {
+        $settings = HM_Pro_Ceviri_I18n::get_settings();
+        $default = $settings['default_lang'] ?? 'tr';
+
+        // base_url: current URL without hm_lang param
+        $path = wp_parse_url($base_url, PHP_URL_PATH) ?: '/';
+        $path = '/' . ltrim($path, '/');
+
+        // Remove any existing prefix
+        $enabled = $settings['enabled_langs'] ?? [$default];
+        $prefixed = array_values(array_filter($enabled, fn($c) => $c !== $default));
+
+        foreach ($prefixed as $p) {
+            if (preg_match('#^/' . preg_quote($p, '#') . '(/|$)#', $path)) {
+                $path = preg_replace('#^/' . preg_quote($p, '#') . '#', '', $path);
+                if ($path === '') $path = '/';
+                break;
+            }
+        }
+
+        if ($lang === $default) {
+            return home_url($path);
+        }
+
+        if ($path === '/') {
+            return home_url('/' . $lang . '/');
+        }
+
+        return home_url('/' . $lang . rtrim($path, '/'));
     }
 
     private function current_url_without_lang_param(): string {
