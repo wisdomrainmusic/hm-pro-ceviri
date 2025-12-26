@@ -10,6 +10,7 @@ class HMPC_Rewrites {
 
     public function register_query_vars($vars) {
         $vars[] = 'hmpc_lang';
+        $vars[] = 'hmpc_path';
         return $vars;
     }
 
@@ -23,17 +24,17 @@ class HMPC_Rewrites {
 
         $lang_regex = implode('|', array_map('preg_quote', $prefixed));
 
-        // /ro/test/  => index.php?hmpc_lang=ro&$matches[2]
+        // /pt/test/ -> index.php?hmpc_lang=pt&hmpc_path=test
         add_rewrite_rule(
-            '^(' . $lang_regex . ')/(.*)$',
-            'index.php?hmpc_lang=$matches[1]&$matches[2]',
+            '^(' . $lang_regex . ')/(.*)/?$',
+            'index.php?hmpc_lang=$matches[1]&hmpc_path=$matches[2]',
             'top'
         );
 
-        // /ro/ => homepage in ro
+        // /pt/ -> homepage in pt
         add_rewrite_rule(
             '^(' . $lang_regex . ')/?$',
-            'index.php?hmpc_lang=$matches[1]',
+            'index.php?hmpc_lang=$matches[1]&hmpc_path=',
             'top'
         );
     }

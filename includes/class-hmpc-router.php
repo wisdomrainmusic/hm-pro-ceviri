@@ -6,6 +6,7 @@ class HMPC_Router {
     public function init(): void {
         // WP route etmeden önce prefix'i kırp
         add_action('parse_request', [$this, 'handle_lang_prefix'], 0);
+        add_action('parse_request', [$this, 'apply_hmpc_path_to_wp_request'], 0);
 
         add_filter('redirect_canonical', [$this, 'prevent_wp_canonical_redirect_on_lang_prefix'], 10, 2);
 
@@ -53,6 +54,26 @@ class HMPC_Router {
         }
 
         $GLOBALS['hmpc_current_lang'] = HMPC_I18n::get_current_lang();
+    }
+
+    public function apply_hmpc_path_to_wp_request(\WP $wp): void {
+        $lang = get_query_var('hmpc_lang');
+        if ($lang) {
+            HMPC_I18n::set_lang_cookie((string)$lang);
+            $GLOBALS['hmpc_current_lang'] = sanitize_key((string)$lang);
+        }
+
+        $path = get_query_var('hmpc_path');
+        if ($path === null) return;
+
+        $path = is_string($path) ? $path : '';
+        $path = ltrim($path, '/'); // "test" or "shop/category" etc.
+
+        // kritik: WP’ye gerçek request budur dedirt
+        $wp->request = $path;
+
+        // query_vars tarafında temiz dursun
+        unset($wp->query_vars['hmpc_path']);
     }
 
     public function prevent_wp_canonical_redirect_on_lang_prefix($redirect_url, $requested_url) {
