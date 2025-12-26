@@ -82,6 +82,14 @@ class HM_Pro_Ceviri_I18n {
         return $lang;
     }
 
+    public static function set_lang_cookie(string $lang): void {
+        $lang = sanitize_key($lang);
+        if (!$lang) return;
+
+        setcookie(self::COOKIE_KEY, $lang, time() + 30 * DAY_IN_SECONDS, COOKIEPATH ?: '/', COOKIE_DOMAIN ?: '', is_ssl(), true);
+        $_COOKIE[self::COOKIE_KEY] = $lang;
+    }
+
     public function maybe_set_language_from_request() {
         if (empty($_GET[self::QUERY_VAR])) return;
 
@@ -92,7 +100,6 @@ class HM_Pro_Ceviri_I18n {
         if (!in_array($requested, $enabled, true)) return;
 
         // Cookie 30 gün
-        setcookie(self::COOKIE_KEY, $requested, time() + 30 * DAY_IN_SECONDS, COOKIEPATH ?: '/', COOKIE_DOMAIN ?: '', is_ssl(), true);
-        $_COOKIE[self::COOKIE_KEY] = $requested;
+        self::set_lang_cookie($requested);
     }
 }
