@@ -5,7 +5,15 @@ class HMPC_I18n {
     const OPT_KEY    = 'hmpc_settings';
     const COOKIE_KEY = 'hmpc_lang';
 
-    public function init(): void {}
+    public function init(): void {
+        add_action('template_redirect', function () {
+            $lang = get_query_var('hmpc_lang');
+            if ($lang) {
+                HMPC_I18n::set_lang_cookie((string) $lang);
+                $GLOBALS['hmpc_current_lang'] = sanitize_key((string) $lang);
+            }
+        }, 0);
+    }
 
     public static function defaults(): array {
         return [
