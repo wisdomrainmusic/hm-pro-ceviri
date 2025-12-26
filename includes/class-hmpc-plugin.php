@@ -7,6 +7,7 @@ require_once HMPC_PATH . 'includes/class-hmpc-admin.php';
 require_once HMPC_PATH . 'includes/class-hmpc-carry.php';
 require_once HMPC_PATH . 'includes/class-hmpc-shortcodes.php';
 require_once HMPC_PATH . 'includes/class-hmpc-seo.php';
+require_once HMPC_PATH . 'includes/class-hmpc-ui.php';
 
 final class HMPC_Plugin {
     private static $instance = null;
@@ -48,5 +49,9 @@ final class HMPC_Plugin {
         // SEO (hreflang + canonical)
         $seo = new HMPC_SEO($this->settings, $this->lang);
         $seo->hooks();
+
+        // UI helpers
+        $ui = new HMPC_UI();
+        $ui->hooks();
     }
 }

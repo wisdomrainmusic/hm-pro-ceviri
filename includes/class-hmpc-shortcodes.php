@@ -115,7 +115,7 @@ class HMPC_Shortcodes {
         }
 
         $sep = $atts['separator'];
-        return '<div class="' . esc_attr($atts['class']) . '">' . implode(wp_kses_post($sep), $links) . '</div>';
+        return '<div class="' . esc_attr($atts['class'] . ' notranslate') . '" translate="no">' . implode(wp_kses_post($sep), $links) . '</div>';
     }
 
     /* ---------- RENDER HELPERS ---------- */
@@ -135,7 +135,7 @@ class HMPC_Shortcodes {
         }
 
         $sep = $atts['separator'];
-        return '<div class="' . esc_attr($atts['class']) . '">' . implode(wp_kses_post($sep), $links) . '</div>';
+        return '<div class="' . esc_attr($atts['class'] . ' notranslate') . '" translate="no">' . implode(wp_kses_post($sep), $links) . '</div>';
     }
 
     private function render_dropdown_links($supported, $current, $atts) {
@@ -151,7 +151,7 @@ class HMPC_Shortcodes {
 
         $script = '<script>(function(){var s=document.getElementById("' . esc_js($id) . '");if(!s)return;s.addEventListener("change",function(){if(this.value){window.location.href=this.value;}});})();</script>';
 
-        $html  = '<div class="' . esc_attr($atts['class']) . '">';
+        $html  = '<div class="' . esc_attr($atts['class'] . ' notranslate') . '" translate="no">';
         $html .= '<select id="' . esc_attr($id) . '" class="hmpc-select" aria-label="Language selector">' . $options . '</select>';
         $html .= '</div>';
         $html .= $script;
