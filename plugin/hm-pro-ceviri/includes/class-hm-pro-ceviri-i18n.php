@@ -22,13 +22,47 @@ class HM_Pro_Ceviri_I18n {
     }
 
     public static function get_languages_catalog(): array {
-        // MVP: küçük liste; sonra Google Translate dilleri full liste olarak genişletiriz.
         return [
             'tr' => ['label' => 'Turkish', 'native' => 'Türkçe'],
             'en' => ['label' => 'English', 'native' => 'English'],
             'de' => ['label' => 'German', 'native' => 'Deutsch'],
             'fr' => ['label' => 'French', 'native' => 'Français'],
+            'it' => ['label' => 'Italian', 'native' => 'Italiano'],
+            'es' => ['label' => 'Spanish', 'native' => 'Español'],
+            'pt' => ['label' => 'Portuguese', 'native' => 'Português'],
+            'nl' => ['label' => 'Dutch', 'native' => 'Nederlands'],
+            'pl' => ['label' => 'Polish', 'native' => 'Polski'],
+
+            'ro' => ['label' => 'Romanian', 'native' => 'Română'],
+            'bg' => ['label' => 'Bulgarian', 'native' => 'Български'],
+            'el' => ['label' => 'Greek', 'native' => 'Ελληνικά'],
+            'ru' => ['label' => 'Russian', 'native' => 'Русский'],
+            'uk' => ['label' => 'Ukrainian', 'native' => 'Українська'],
+
+            'ka' => ['label' => 'Georgian', 'native' => 'ქართული'],
+            'hy' => ['label' => 'Armenian', 'native' => 'Հայերեն'],
+            'az' => ['label' => 'Azerbaijani', 'native' => 'Azərbaycan'],
+            'fa' => ['label' => 'Persian', 'native' => 'فارسی'],
             'ar' => ['label' => 'Arabic', 'native' => 'العربية'],
+            'he' => ['label' => 'Hebrew', 'native' => 'עברית'],
+
+            'sr' => ['label' => 'Serbian', 'native' => 'Srpski'],
+            'hr' => ['label' => 'Croatian', 'native' => 'Hrvatski'],
+            'bs' => ['label' => 'Bosnian', 'native' => 'Bosanski'],
+            'sq' => ['label' => 'Albanian', 'native' => 'Shqip'],
+            'hu' => ['label' => 'Hungarian', 'native' => 'Magyar'],
+            'cs' => ['label' => 'Czech', 'native' => 'Čeština'],
+            'sk' => ['label' => 'Slovak', 'native' => 'Slovenčina'],
+            'sl' => ['label' => 'Slovenian', 'native' => 'Slovenščina'],
+
+            'sv' => ['label' => 'Swedish', 'native' => 'Svenska'],
+            'no' => ['label' => 'Norwegian', 'native' => 'Norsk'],
+            'da' => ['label' => 'Danish', 'native' => 'Dansk'],
+            'fi' => ['label' => 'Finnish', 'native' => 'Suomi'],
+
+            // Kurdish variants (Google codes)
+            'ku'  => ['label' => 'Kurdish (Kurmanji)', 'native' => 'Kurdî (Kurmancî)'],
+            'ckb' => ['label' => 'Kurdish (Sorani)', 'native' => 'کوردی (سۆرانی)'],
         ];
     }
 
