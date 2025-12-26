@@ -4,6 +4,7 @@ if (!defined('ABSPATH')) exit;
 require_once HMPC_PATH . 'includes/class-hmpc-settings.php';
 require_once HMPC_PATH . 'includes/class-hmpc-lang.php';
 require_once HMPC_PATH . 'includes/class-hmpc-admin.php';
+require_once HMPC_PATH . 'includes/class-hmpc-carry.php';
 require_once HMPC_PATH . 'includes/class-hmpc-shortcodes.php';
 require_once HMPC_PATH . 'includes/class-hmpc-seo.php';
 
@@ -35,6 +36,10 @@ final class HMPC_Plugin {
 
         // Public hooks
         $this->lang->hooks();
+
+        // Carry hmpc_lang in links/forms
+        $carry = new HMPC_Carry($this->settings, $this->lang);
+        $carry->hooks();
 
         // Shortcodes
         $shortcodes = new HMPC_Shortcodes($this->settings, $this->lang);

@@ -147,7 +147,13 @@ class HMPC_Lang {
     }
 
     public function filter_locale($locale) {
-        // Map simple lang codes to WP locales
+        // Admin tarafına ASLA karışma (ayar ekranı, wp-admin, login)
+        if (is_admin()) return $locale;
+
+        // AJAX / REST gibi özel durumlarda da dokunmayalım (stabilite)
+        if (defined('DOING_AJAX') && DOING_AJAX) return $locale;
+        if (defined('REST_REQUEST') && REST_REQUEST) return $locale;
+
         $lang = $this->get_current();
 
         $map = array(
@@ -160,16 +166,13 @@ class HMPC_Lang {
             'ru' => 'ru_RU',
         );
 
-        // If user uses custom codes like en-gb, try to map
         if (isset($map[$lang])) return $map[$lang];
 
-        // If looks like xx-yy then convert to xx_YY
         if (preg_match('/^[a-z]{2}\-[a-z]{2}$/', $lang)) {
             $parts = explode('-', $lang);
             return strtolower($parts[0]) . '_' . strtoupper($parts[1]);
         }
 
-        // Fallback: keep original
         return $locale;
     }
 
