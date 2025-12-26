@@ -30,25 +30,20 @@ class HM_Pro_Ceviri_Switcher {
         $base_url = $this->current_url_without_lang_param();
 
         if ($atts['style'] === 'dropdown') {
-            $out = '<form class="hmpc-switcher hmpc-switcher--dropdown" method="get" action="">';
-            $out .= '<select name="' . esc_attr(HM_Pro_Ceviri_I18n::QUERY_VAR) . '" onchange="this.form.submit()">';
+            $out  = "<div class='hmpc-switcher hmpc-switcher--dropdown' role='navigation' aria-label='Language switcher'>";
+            $out .= "<select class='hmpc-switcher__select' onchange=\"if(this.value){window.location.href=this.value;}\">";
+
             foreach ($enabled as $code) {
                 $label = $this->label_for($code, $catalog, $atts['show_native'] === '1');
-                $out .= '<option value="' . esc_attr($code) . '"' . selected($current, $code, false) . '>' . esc_html($label) . '</option>';
-            }
-            $out .= '</select>';
-
-            foreach ($_GET as $k => $v) {
-                if ($k === HM_Pro_Ceviri_I18n::QUERY_VAR) continue;
-                if (is_array($v)) continue;
-                $out .= '<input type="hidden" name="' . esc_attr($k) . '" value="' . esc_attr((string) $v) . '">';
+                $url   = $this->url_for_lang($base_url, $code); // clean URL
+                $out  .= '<option value="' . esc_url($url) . '"' . selected($current, $code, false) . '>' . esc_html($label) . '</option>';
             }
 
-            $out .= '</form>';
+            $out .= '</select></div>';
             return $out;
         }
 
-        $out = '<div class="hmpc-switcher hmpc-switcher--inline" role="navigation" aria-label="Language switcher">';
+        $out = "<div class='hmpc-switcher hmpc-switcher--inline' role='navigation' aria-label='Language switcher'>";
         foreach ($enabled as $code) {
             $label = $this->label_for($code, $catalog, $atts['show_native'] === '1');
             $url = $this->url_for_lang($base_url, $code);
