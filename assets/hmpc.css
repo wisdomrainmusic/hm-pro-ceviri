@@ -1,0 +1,31 @@
+.hmpc-switcher {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.hmpc-select {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    background: #fff;
+}
+
+.hmpc-link {
+    padding: 6px 10px;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+}
+
+.hmpc-link:focus-visible,
+.hmpc-select:focus-visible {
+    outline: 2px solid #2271b1;
+    outline-offset: 2px;
+}
+
+.hmpc-link.is-active {
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.04);
+}

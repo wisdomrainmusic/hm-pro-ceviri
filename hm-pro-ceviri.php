@@ -4,6 +4,8 @@
  * Description: URL-based multilingual layer (e.g. /en/). Clean switcher + cookie persistence. Google Translate integration planned.
  * Version: 0.2.0
  * Author: HM
+ * Text Domain: hm-pro-ceviri
+ * Domain Path: /languages
  */
 
 if (!defined('ABSPATH')) {
@@ -14,6 +16,10 @@ define('HMPC_VERSION', '0.2.0');
 define('HMPC_PATH', plugin_dir_path(__FILE__));
 define('HMPC_URL', plugin_dir_url(__FILE__));
 define('HMPC_SLUG', 'hm-pro-ceviri');
+
+add_action('init', function () {
+    load_plugin_textdomain('hm-pro-ceviri', false, dirname(plugin_basename(__FILE__)) . '/languages');
+});
 
 require_once HMPC_PATH . 'includes/class-hmpc.php';
 
