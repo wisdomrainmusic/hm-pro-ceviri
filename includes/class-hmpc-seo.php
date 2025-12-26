@@ -26,48 +26,56 @@ class HMPC_SEO {
 		$supported = $this->settings->supported_langs();
 		if (empty($supported)) return;
 
-		$current_url = $this->current_full_url_no_fragment();
-		$current_lang = $this->lang->get_current();
+                $current_url = $this->current_full_url_no_fragment();
+                $current_lang = $this->lang->get_current();
 
-		// Emit alternates for each supported lang
-		foreach ($supported as $code) {
-			$url = $this->with_lang($current_url, $code);
-			$hreflang = $this->to_hreflang($code);
-			echo '<link rel="alternate" hreflang="' . esc_attr($hreflang) . '" href="' . esc_url($url) . "\" />\n";
-		}
+                // Emit alternates for each supported lang
+                foreach ($supported as $code) {
+                        $url = $this->with_lang_or_clean($current_url, $code);
+                        $hreflang = $this->to_hreflang($code);
+                        echo '<link rel="alternate" hreflang="' . esc_attr($hreflang) . '" href="' . esc_url($url) . "\" />\n"; 
+                }
 
-		// x-default -> default language URL
-		$default = $this->settings->get('default_lang');
-		$default = $default ? strtolower(trim($default)) : $current_lang;
-		$default_url = $this->with_lang($current_url, $default);
-		echo '<link rel="alternate" hreflang="x-default" href="' . esc_url($default_url) . "\" />\n";
-	}
+                // x-default -> default language URL
+                $default = $this->settings->get('default_lang');
+                $default = $default ? strtolower(trim($default)) : $current_lang;
+                $default_url = $this->with_lang_or_clean($current_url, $default);
+                echo '<link rel="alternate" hreflang="x-default" href="' . esc_url($default_url) . "\" />\n";
+        }
 
 	public function filter_canonical($canonical) {
 		// If WordPress canonical exists, ensure it includes current hmpc_lang when present
-		$current = $this->current_full_url_no_fragment();
-		$lang = $this->lang->get_current();
+                $current = $this->current_full_url_no_fragment();
+                $lang = $this->lang->get_current();
 
-		// If request has explicit query param, canonical should keep it (query-based language mode)
-		if (isset($_GET['hmpc_lang'])) {
-			return $this->with_lang($current, $lang);
-		}
+                // If request has explicit query param, canonical should keep it (query-based language mode)
+                if (isset($_GET['hmpc_lang'])) {
+                        // If default was requested explicitly, canonical must be clean
+                        if ($this->is_default_request()) {
+                                return remove_query_arg('hmpc_lang', $current);
+                        }
+                        return $this->with_lang_or_clean($current, $lang);
+                }
 
-		// Otherwise keep original canonical
-		return $canonical;
-	}
+                // Otherwise keep original canonical
+                return $canonical;
+        }
 
 	public function filter_rankmath_canonical($canonical) {
 		// Same logic for Rank Math
-		$current = $this->current_full_url_no_fragment();
-		$lang = $this->lang->get_current();
+                $current = $this->current_full_url_no_fragment();
+                $lang = $this->lang->get_current();
 
-		if (isset($_GET['hmpc_lang'])) {
-			return $this->with_lang($current, $lang);
-		}
+                if (isset($_GET['hmpc_lang'])) {
+                        // If default was requested explicitly, canonical must be clean
+                        if ($this->is_default_request()) {
+                                return remove_query_arg('hmpc_lang', $current);
+                        }
+                        return $this->with_lang_or_clean($current, $lang);
+                }
 
-		return $canonical;
-	}
+                return $canonical;
+        }
 
 	private function current_full_url_no_fragment() {
 		$scheme = is_ssl() ? 'https' : 'http';
@@ -85,10 +93,22 @@ class HMPC_SEO {
 		return $scheme . '://' . $host . $path . ($query ? ('?' . $query) : '');
 	}
 
-	private function with_lang($url, $lang) {
-		$lang = strtolower(trim((string)$lang));
-		return add_query_arg('hmpc_lang', rawurlencode($lang), $url);
-	}
+        private function with_lang_or_clean($url, $lang) {
+                $lang = strtolower(trim((string)$lang));
+                $default = $this->settings->default_lang();
+
+                if ($lang === $default) {
+                        return remove_query_arg('hmpc_lang', $url);
+                }
+                return add_query_arg('hmpc_lang', rawurlencode($lang), $url);
+        }
+
+        private function is_default_request() {
+                if (!isset($_GET['hmpc_lang'])) return false;
+                $q = strtolower(trim((string) wp_unslash($_GET['hmpc_lang'])));
+                $q = preg_replace('/[^a-zA-Z\-]/', '', $q);
+                return ($q === $this->settings->default_lang());
+        }
 
 	private function to_hreflang($code) {
 		$code = strtolower(trim((string)$code));

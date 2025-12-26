@@ -77,16 +77,23 @@ class HMPC_Shortcodes {
 		return $html;
 	}
 
-	private function build_lang_url($lang) {
-		$lang = strtolower(trim((string)$lang));
+        private function build_lang_url($lang) {
+                $lang = strtolower(trim((string)$lang));
 
-		$scheme = is_ssl() ? 'https' : 'http';
-		$host = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) : '';
-		$uri  = isset($_SERVER['REQUEST_URI']) ? (string) $_SERVER['REQUEST_URI'] : '/';
+                $scheme = is_ssl() ? 'https' : 'http';
+                $host = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) : '';
+                $uri  = isset($_SERVER['REQUEST_URI']) ? (string) $_SERVER['REQUEST_URI'] : '/';
 
-		$base = $scheme . '://' . $host . $uri;
+                $base = $scheme . '://' . $host . $uri;
 
-		// Ensure we replace existing hmpc_lang only
-		return add_query_arg('hmpc_lang', rawurlencode($lang), $base);
-	}
+                $default = $this->settings->default_lang();
+
+                // Default language -> clean URL (remove hmpc_lang)
+                if ($lang === $default) {
+                        return remove_query_arg('hmpc_lang', $base);
+                }
+
+                // Non-default -> ensure param exists
+                return add_query_arg('hmpc_lang', rawurlencode($lang), $base);
+        }
 }

@@ -101,4 +101,11 @@ class HMPC_Settings {
 
         return $sanitized;
     }
+
+    public function default_lang() {
+        $default = strtolower(trim((string) $this->get('default_lang')));
+        $default = preg_replace('/[^a-zA-Z\-]/', '', $default);
+        if ($default === '') $default = 'tr';
+        return $default;
+    }
 }
