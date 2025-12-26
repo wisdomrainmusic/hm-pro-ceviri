@@ -18,54 +18,47 @@ class HM_Pro_Ceviri_Router {
     }
 
     public function add_rewrite_rules() {
-        $settings = HM_Pro_Ceviri_I18n::get_settings();
-        $enabled = $settings['enabled_langs'] ?? ['tr', 'en'];
-        $default = $settings['default_lang'] ?? 'tr';
-
-        // TR için prefix yok; diğer enabled diller için prefix var
-        $prefixed = array_values(array_filter($enabled, fn($c) => $c !== $default));
-
-        if (empty($prefixed)) return;
-
-        $lang_regex = implode('|', array_map('preg_quote', $prefixed));
-
-        // Not: pagename ile her şeyi çözmek istemiyoruz.
-        // WordPress'in kendi rewrite'ı devreye girecek; biz sadece lang'ı query'e eklemek istiyoruz.
-        add_rewrite_rule(
-            '^(' . $lang_regex . ')(?:/(.*))?$',
-            'index.php?' . self::QV . '=$matches[1]&$matches[2]',
-            'top'
-        );
+        // Intentionally left blank for MVP.
+        // We handle /{lang}/ prefix by stripping it in parse_request.
     }
 
     public function parse_request_lang($wp) {
+        $settings = HM_Pro_Ceviri_I18n::get_settings();
+        $enabled  = $settings['enabled_langs'] ?? ['tr'];
+        $default  = $settings['default_lang'] ?? 'tr';
+
+        // Prefixed languages: all except default (TR stays without prefix)
+        $prefixed = array_values(array_filter($enabled, fn($c) => $c !== $default));
+
         $lang = '';
 
-        // 1) URL prefix (rewrite ile gelir)
-        if (!empty($wp->query_vars[self::QV])) {
-            $lang = sanitize_key($wp->query_vars[self::QV]);
+        // Detect from path: $wp->request example: "en/test" or "en" or "urun/abc"
+        $req = ltrim((string) ($wp->request ?? ''), '/');
+
+        foreach ($prefixed as $code) {
+            if ($req === $code || str_starts_with($req, $code . '/')) {
+                $lang = $code;
+
+                // Strip prefix from request so WP resolves correct page/product/category
+                $new_req = substr($req, strlen($code));
+                $new_req = ltrim($new_req, '/');
+                $wp->request = $new_req; // can be "" for homepage
+
+                break;
+            }
         }
 
-        // 2) Query param (fallback)
+        // Fallback: query param ?hm_lang=
         if (!$lang && !empty($_GET[self::QV])) {
-            $lang = sanitize_key((string) $_GET[self::QV]);
+            $q = sanitize_key((string) $_GET[self::QV]);
+            if (in_array($q, $enabled, true)) $lang = $q;
         }
-
-        // validate enabled
-        $settings = HM_Pro_Ceviri_I18n::get_settings();
-        $enabled = $settings['enabled_langs'] ?? ['tr'];
-        $default = $settings['default_lang'] ?? 'tr';
 
         if ($lang && in_array($lang, $enabled, true)) {
             HM_Pro_Ceviri_I18n::set_lang_cookie($lang);
-        } else {
-            // ensure cookie default exists (optional)
-            // do not force set; leave as-is
-            $lang = HM_Pro_Ceviri_I18n::get_current_lang();
         }
 
-        // expose to global for later use if needed
-        $GLOBALS['hmpc_current_lang'] = $lang ?: $default;
+        $GLOBALS['hmpc_current_lang'] = $lang ?: HM_Pro_Ceviri_I18n::get_current_lang();
     }
 
     public function maybe_redirect_clean_url() {
