@@ -46,15 +46,18 @@ class HMPC_Carry {
 
 	private function should_carry() {
 		if (is_admin()) return false;
-		if (defined('DOING_AJAX') && DOING_AJAX) return false;
-		if (defined('REST_REQUEST') && REST_REQUEST) return false;
+                if (defined('DOING_AJAX') && DOING_AJAX) return false;
+                if (defined('REST_REQUEST') && REST_REQUEST) return false;
 
-		$lang = $this->lang->get_current();
-		if (!$lang) return false;
+                $lang = $this->lang->get_current();
+                if (!$lang) return false;
 
-		// Carry ONLY if current lang is allowed
-		return $this->settings->is_lang_allowed($lang);
-	}
+                // Do not carry param for default language (keep URLs clean)
+                if ($lang === $this->settings->default_lang()) return false;
+
+                // Carry ONLY if current lang is allowed
+                return $this->settings->is_lang_allowed($lang);
+        }
 
 	public function add_lang_to_url($url) {
 		if (!$this->should_carry()) return $url;

@@ -22,6 +22,7 @@ class HMPC_Lang {
 
         // Legacy prefix cleanup (/en/... -> /...)
         add_action('template_redirect', array($this, 'maybe_redirect_legacy_prefix'), 1);
+        add_action('template_redirect', array($this, 'maybe_strip_default_lang_param'), 2);
     }
 
     public function get_current() {
@@ -50,7 +51,12 @@ class HMPC_Lang {
             $q = $this->sanitize_lang(wp_unslash($_GET['hmpc_lang']));
             if ($this->settings->is_lang_allowed($q)) {
                 $chosen = $q;
-                $this->set_cookie($chosen);
+
+                // Do not persist cookie for default language (keep TR clean & canonical)
+                $default = $this->settings->default_lang();
+                if ($chosen !== $default) {
+                    $this->set_cookie($chosen);
+                }
             }
         }
 
@@ -213,5 +219,39 @@ class HMPC_Lang {
 
         wp_safe_redirect($new_uri, 301);
         exit;
+    }
+
+    public function maybe_strip_default_lang_param() {
+        if (is_admin() || defined('DOING_AJAX') || (defined('REST_REQUEST') && REST_REQUEST)) return;
+
+        if (!isset($_GET['hmpc_lang'])) return;
+
+        $default = $this->settings->default_lang();
+        $q = $this->sanitize_lang(wp_unslash($_GET['hmpc_lang']));
+
+        // If default language is explicitly requested, redirect to clean URL (no param)
+        if ($q === $default) {
+            $scheme = is_ssl() ? 'https' : 'http';
+            $host = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) : '';
+            $uri  = isset($_SERVER['REQUEST_URI']) ? (string) $_SERVER['REQUEST_URI'] : '/';
+
+            $parts = wp_parse_url($scheme . '://' . $host . $uri);
+            $path  = isset($parts['path']) ? $parts['path'] : '/';
+
+            // Remove only hmpc_lang from query, keep everything else
+            $query = array();
+            if (isset($parts['query']) && $parts['query'] !== '') {
+                parse_str($parts['query'], $query);
+                unset($query['hmpc_lang']);
+            }
+
+            $new = $path;
+            if (!empty($query)) {
+                $new .= '?' . http_build_query($query);
+            }
+
+            wp_safe_redirect($new, 301);
+            exit;
+        }
     }
 }
